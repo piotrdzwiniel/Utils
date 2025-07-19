@@ -5,6 +5,7 @@ import os
 # Load metadata
 df = pd.read_csv("2_CrossRefMetadata.csv")
 
+
 # Function to generate new filename based on metadata
 def format_filename(authors, year, title):
     first_author = authors.split(";")[0].strip()
@@ -17,6 +18,7 @@ def format_filename(authors, year, title):
     raw_filename = f"{author_last} ({year_str}) {title_snippet}.pdf"
     safe_filename = re.sub(r'[<>:"/\\|?*]', '', raw_filename)
     return safe_filename
+
 
 # Generate new filenames only for known DOIs
 df['new_filename'] = df.apply(
@@ -31,9 +33,6 @@ df = df.drop(columns=['new_filename'])
 
 # Reorder columns
 df = df[['filename', 'authors', 'year', 'title', 'doi']]
-
-# Preview
-# print(df)
 
 # Save updated CSV
 df.to_csv("3_FilenameAuthorYearTitleDOI.csv", index=False)

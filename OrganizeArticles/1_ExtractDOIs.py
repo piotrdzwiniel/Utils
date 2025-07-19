@@ -1,4 +1,4 @@
-import fitz  # PyMuPDF
+import fitz  # pip install pymupdf
 import re
 from pathlib import Path
 import pandas as pd
@@ -7,7 +7,6 @@ import pandas as pd
 pdf_folder = Path("articles")
 
 # Regex pattern for DOI
-# doi_pattern = re.compile(r'\b10\.\d{4,9}/\S+\b', re.IGNORECASE)
 doi_pattern = re.compile(r'10\.\d{4,9}/[^\s"<>]+', re.IGNORECASE)
 
 # Store results
@@ -41,9 +40,6 @@ for pdf_file in pdf_folder.glob("*.pdf"):
 
 # Convert to DataFrame
 df = pd.DataFrame(results)
-
-# Show results
-print(df)
 
 # Optional: Save to CSV
 df.to_csv("1_DOIs.csv", index=False)

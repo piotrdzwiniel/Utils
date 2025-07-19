@@ -64,7 +64,7 @@ for index, row in df.iterrows():
                 "authors": "Unknown"
             })
 
-        time.sleep(0.5)  # Be polite to the API
+        time.sleep(0.5)  # Be polite to the API; one call per 0.5 s
     else:
         print("⚠️ No valid DOI provided.")
         records.append({
