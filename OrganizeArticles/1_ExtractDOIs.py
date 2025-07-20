@@ -6,6 +6,26 @@ import pandas as pd
 # Path to folder with PDFs
 pdf_folder = Path("temp")
 
+# Rename all PDFs to sequential numbers
+pdf_files = list(pdf_folder.glob("*.pdf"))
+pdf_files.sort()  # ensure consistent order
+
+print(f"🔁 Renaming {len(pdf_files)} files to sequential numbers...\n")
+
+for i, file in enumerate(pdf_files, 1):
+    new_name = f"{i}.pdf"
+    new_path = pdf_folder / new_name
+    try:
+        file.rename(new_path)
+        print(f"✅ Renamed: {file.name} → {new_name}")
+    except Exception as e:
+        print(f"❌ Failed to rename {file.name}: {e}")
+
+# Refresh file list after renaming
+pdf_files = list(pdf_folder.glob("*.pdf"))
+pdf_files.sort()  # sort numerically if needed
+total_files = len(pdf_files)
+
 # Regex pattern for DOI
 doi_pattern = re.compile(r'10\.\d{4,9}/[^\s"<>]+', re.IGNORECASE)
 
@@ -16,7 +36,7 @@ results = []
 pdf_files = list(pdf_folder.glob("*.pdf"))
 total_files = len(pdf_files)
 
-print(f"📁 Found {total_files} PDF files to process.\n")
+print(f"\n📁 Found {total_files} PDF files to process.\n")
 
 # Loop through PDFs with progress display
 for idx, pdf_file in enumerate(pdf_files, 1):

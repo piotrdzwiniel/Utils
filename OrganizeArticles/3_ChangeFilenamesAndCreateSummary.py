@@ -82,6 +82,8 @@ folder_path = "temp"
 
 if change_file_names:
     original_df = pd.read_csv("2_CrossRefMetadata.csv")  # use original to map old → new
+    original_df['doi'] = original_df['doi'].astype(str).str.strip().str.lower()
+
     total = len(df)
     count = 0
 
@@ -100,6 +102,7 @@ if change_file_names:
             continue  # filename remains unchanged, nothing to rename
 
         old_name = original_df.loc[original_df['doi'] == doi, 'filename'].values
+
         if len(old_name) == 0:
             print(f"⚠️ Original filename not found for DOI: {doi}")
             continue
