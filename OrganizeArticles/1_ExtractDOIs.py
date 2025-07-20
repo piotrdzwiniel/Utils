@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 
 # Path to folder with PDFs
-pdf_folder = Path("articles")
+pdf_folder = Path("temp")
 
 # Regex pattern for DOI
 doi_pattern = re.compile(r'10\.\d{4,9}/[^\s"<>]+', re.IGNORECASE)
@@ -12,8 +12,14 @@ doi_pattern = re.compile(r'10\.\d{4,9}/[^\s"<>]+', re.IGNORECASE)
 # Store results
 results = []
 
-# Loop through PDFs
-for pdf_file in pdf_folder.glob("*.pdf"):
+# Get list of PDF files
+pdf_files = list(pdf_folder.glob("*.pdf"))
+total_files = len(pdf_files)
+
+print(f"📁 Found {total_files} PDF files to process.\n")
+
+# Loop through PDFs with progress display
+for idx, pdf_file in enumerate(pdf_files, 1):
     try:
         with fitz.open(pdf_file) as doc:
             text = ""
@@ -24,7 +30,7 @@ for pdf_file in pdf_folder.glob("*.pdf"):
 
             # Search for DOI
             match = doi_pattern.search(text)
-            doi = match.group(0).rstrip(').') if match else "Unknown"
+            doi = match.group(0).rstrip(').,') if match else "Unknown"
 
             results.append({
                 "filename": pdf_file.name,
@@ -38,8 +44,13 @@ for pdf_file in pdf_folder.glob("*.pdf"):
             "doi": "Unknown"
         })
 
+    # Progress display
+    progress = (idx / total_files) * 100
+    print(f"✅ Processed {idx} / {total_files} ({progress:.1f}%) — {pdf_file.name}")
+
 # Convert to DataFrame
 df = pd.DataFrame(results)
 
 # Optional: Save to CSV
 df.to_csv("1_DOIs.csv", index=False)
+print("\n✅ Finished processing. Results saved to 1_DOIs.csv.")

@@ -3,11 +3,12 @@ import re
 import os
 
 # Load metadata
-df = pd.read_csv("2_CrossRefMetadata.csv")
+df = pd.read_csv("2_CrossRefMetadata.csv").dropna()
 
 
 # Function to generate new filename based on metadata
 def format_filename(authors, year, title):
+    print(authors, year, title)
     first_author = authors.split(";")[0].strip()
     author_last = first_author.split()[0]
 
@@ -22,33 +23,48 @@ def format_filename(authors, year, title):
 
 # Generate new filenames only for known DOIs
 df['new_filename'] = df.apply(
-    lambda row: row['filename'] if str(row['doi']).strip().lower() == "unknown"
+    lambda row: row['filename'] if str(row['doi']).strip().lower() in ["unknown"]
+                                   or str(row['title']).strip().lower() in ["unknown", "abstract"]
+                                   or str(row['authors']).strip().lower() in ["unknown"]
     else format_filename(row['authors'], row['year'], row['title']),
     axis=1
 )
 
 # Overwrite 'filename' column with new filenames (as per user request)
 df['filename'] = df['new_filename']
-df = df.drop(columns=['new_filename'])
+df.drop(columns=['new_filename'], inplace=True)
 
 # Reorder columns
-df = df[['filename', 'authors', 'year', 'title', 'doi']]
+expected_columns = ['filename', 'authors', 'year', 'title', 'doi']
+if 'apa_citation' in df.columns:
+    expected_columns.append('apa_citation')
+
+df = df[expected_columns]
 
 # Save updated CSV
-df.to_csv("3_FilenameAuthorYearTitleDOI.csv", index=False)
+df.to_csv("3_FilenameAuthorYearTitleDOI.csv", index=False, encoding='utf-8-sig')
 
 # Rename files on disk if enabled
 change_file_names = True
-folder_path = "articles"
+folder_path = "temp"
 
 if change_file_names:
     original_df = pd.read_csv("2_CrossRefMetadata.csv")  # use original to map old → new
+    total = len(df)
+    count = 0
+
     for _, row in df.iterrows():
+        count += 1
         new_name = row['filename']
         doi = row['doi']
+        title = row['title']
+        progress = (count / total) * 100
+
+        print(f"\n🔄 Processing {count}/{total} ({progress:.1f}%) — DOI: {doi}")
 
         # Get original filename from the initial CSV
-        if str(doi).strip().lower() == "unknown":
+        if str(doi).strip().lower() == "unknown" or str(title).strip().lower() == "unknown":
+            print("⚠️ Skipped (DOI or title is unknown)")
             continue  # filename remains unchanged, nothing to rename
 
         old_name = original_df.loc[original_df['doi'] == doi, 'filename'].values
@@ -61,6 +77,7 @@ if change_file_names:
         new_path = os.path.join(folder_path, new_name)
 
         if old_name == new_name:
+            print("ℹ️ No renaming needed (same name)")
             continue  # nothing to rename
 
         if os.path.exists(old_path):
