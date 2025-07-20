@@ -2,7 +2,7 @@ import os
 import shutil
 import pandas as pd
 
-# === CONFIGURATION ===
+# Configuration
 input_csv = "3_FilenameAuthorYearTitleDOI.csv"
 source_folder = "temp"
 good_folder = "articles_good"
@@ -12,7 +12,7 @@ bad_folder = "articles_bad"
 os.makedirs(good_folder, exist_ok=True)
 os.makedirs(bad_folder, exist_ok=True)
 
-# === 1. Load metadata ===
+# Load metadata
 df = pd.read_csv(input_csv)
 
 total_files = len(df)
@@ -22,7 +22,7 @@ moved_to_bad = 0
 
 print(f"📥 Processing {total_files} articles from folder: {source_folder}")
 
-# === 2. Move articles based on DOI availability ===
+# Move articles based on DOI availability
 for idx, row in df.iterrows():
     filename = row["filename"]
     doi = str(row["doi"]).strip().lower()
@@ -52,7 +52,7 @@ for idx, row in df.iterrows():
     except Exception as e:
         print(f"❌ Error moving file {filename}: {e}")
 
-# === 3. Summary ===
+# Summary
 print("\n✅ Operation complete.")
 print(f"📦 Successfully moved: {processed_files} of {total_files} articles.")
 

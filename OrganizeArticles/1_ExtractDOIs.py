@@ -25,7 +25,7 @@ for idx, pdf_file in enumerate(pdf_files, 1):
             text = ""
             for page in doc:
                 text += page.get_text()
-                if len(text) > 10000:  # limit text length for performance
+                if len(text) > 5000:  # limit text length for performance
                     break
 
             # Search for DOI

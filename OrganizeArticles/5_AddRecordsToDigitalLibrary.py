@@ -2,27 +2,12 @@ import pandas as pd
 import os
 import shutil
 
-# Show all columns and rows
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', None)
-
-# Optional: Expand the column width so it doesn't truncate text
-pd.set_option('display.max_colwidth', None)  # for pandas < 1.0 use -1
-
-# Optional: Do not wrap the frame across multiple lines
-pd.set_option('display.width', None)
-
 # File paths
 input_csv = "3_FilenameAuthorYearTitleDOI.csv"
 library_csv = "DigitalLibrary.csv"
 good_folder = "articles_good"
 bad_folder = "articles_bad"
 dup_folder = "articles_duplicates"
-
-# Ensure destination folders exist
-os.makedirs(good_folder, exist_ok=True)
-os.makedirs(bad_folder, exist_ok=True)
-os.makedirs(dup_folder, exist_ok=True)
 
 # Load data
 new_df = pd.read_csv(input_csv)
@@ -41,11 +26,6 @@ new_df = new_df[
     (new_df['authors'].str.lower() != 'unknown')
 ].copy()
 
-# new_df = new_df[new_df['doi'].str.lower() != 'unknown'].copy()
-# new_df['doi'] = new_df['doi'].str.strip().str.lower()  # normalize DOI
-
-print(new_df)
-
 if os.path.exists(library_csv):
     library_df = pd.read_csv(library_csv)
     library_df['doi'] = library_df['doi'].str.strip().str.lower()  # normalize DOI
@@ -56,6 +36,9 @@ else:
 existing_dois = set(library_df['doi'].dropna())
 new_entries = new_df[~new_df['doi'].isin(existing_dois)].copy()
 duplicates = new_df[new_df['doi'].isin(existing_dois)].copy()
+
+# Drop internal duplicates (same DOI) from new entries
+new_entries = new_entries.drop_duplicates(subset='doi', keep='first')
 
 # Append new entries to library ===
 if not new_entries.empty:

@@ -1,10 +1,42 @@
 import pandas as pd
 import re
 import os
+import shutil
 
 # Load metadata
-df = pd.read_csv("2_CrossRefMetadata.csv").dropna()
+df = pd.read_csv("2_CrossRefMetadata.csv").dropna(how='all')
 
+# Remove duplicates
+folder_path = "temp"
+dup_folder = "articles_duplicates"
+
+# Normalize DOIs
+df['doi'] = df['doi'].astype(str).str.strip().str.lower()
+
+# Filter for valid DOIs
+valid_df = df[df['doi'] != 'unknown'].copy()
+
+# Find duplicate DOIs (excluding 'unknown')
+duplicate_dois = valid_df[valid_df.duplicated('doi', keep='first')]['doi'].unique()
+
+# Iterate over duplicate DOIs
+for dup_doi in duplicate_dois:
+    duplicates = df[df['doi'] == dup_doi]
+    # Keep first occurrence, remove rest
+    to_remove = duplicates.iloc[1:]
+    for _, row in to_remove.iterrows():
+        file_to_move = os.path.join(folder_path, row['filename'])
+        target_path = os.path.join(dup_folder, row['filename'])
+        if os.path.exists(file_to_move):
+            try:
+                shutil.move(file_to_move, target_path)
+                print(f"🔁 Moved duplicate file to '{dup_folder}': {row['filename']}")
+            except Exception as e:
+                print(f"❌ Failed to move duplicate file '{row['filename']}': {e}")
+        else:
+            print(f"⚠️ Duplicate file not found in '{folder_path}': {row['filename']}")
+    # Drop all but the first occurrence
+    df = df.drop(to_remove.index)
 
 # Function to generate new filename based on metadata
 def format_filename(authors, year, title):

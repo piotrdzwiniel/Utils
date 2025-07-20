@@ -1,6 +1,20 @@
 import pandas as pd
 import requests
 import time
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+# Set up retry strategy for session
+retry_strategy = Retry(
+    total=12,  # Number of retries
+    backoff_factor=10,  # Wait: 1s, 2s, 4s...
+    status_forcelist=[429, 500, 502, 503, 504],
+    allowed_methods=["GET"]
+)
+adapter = HTTPAdapter(max_retries=retry_strategy)
+session = requests.Session()
+session.mount("https://", adapter)
+
 
 # Load CSV with DOIs
 df = pd.read_csv("1_DOIs.csv").dropna()
@@ -34,7 +48,8 @@ for index, row in df.iterrows():
 
         try:
             # Get metadata
-            response = requests.get(url, headers=headers, timeout=10)
+            # response = requests.get(url, headers=headers, timeout=10)
+            response = session.get(url, headers=headers, timeout=10)
             response.raise_for_status()
             data = response.json()['message']
 
@@ -57,7 +72,8 @@ for index, row in df.iterrows():
 
             # Get APA citation
             try:
-                citation_response = requests.get(citation_url, headers=headers_apa, timeout=10)
+                # citation_response = requests.get(citation_url, headers=headers_apa, timeout=10)
+                citation_response = session.get(citation_url, headers=headers_apa, timeout=10)
                 citation_response.raise_for_status()
 
                 # Force decoding with UTF-8-Sig (sig helps read the CSV files in Excel)
@@ -89,7 +105,7 @@ for index, row in df.iterrows():
                 "apa_citation": "Unavailable"
             })
 
-        time.sleep(0.5)  # Be polite to the API; one call per 0.5 s
+        time.sleep(1.0)  # Be polite to the API; one call per 0.5 s
     else:
         print("⚠️ No valid DOI provided.")
         records.append({
