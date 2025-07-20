@@ -33,8 +33,8 @@ doi_pattern = re.compile(r'10\.\d{4,9}/[^\s"<>]+', re.IGNORECASE)
 results = []
 
 # Get list of PDF files
-pdf_files = list(pdf_folder.glob("*.pdf"))
-total_files = len(pdf_files)
+# pdf_files = list(pdf_folder.glob("*.pdf"))
+# total_files = len(pdf_files)
 
 print(f"\n📁 Found {total_files} PDF files to process.\n")
 

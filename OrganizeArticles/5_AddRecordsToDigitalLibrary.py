@@ -40,7 +40,7 @@ duplicates = new_df[new_df['doi'].isin(existing_dois)].copy()
 # Drop internal duplicates (same DOI) from new entries
 new_entries = new_entries.drop_duplicates(subset='doi', keep='first')
 
-# Append new entries to library ===
+# Append new entries to library
 if not new_entries.empty:
     updated_library = pd.concat([library_df, new_entries], ignore_index=True)
     updated_library.to_csv(library_csv, index=False, encoding='utf-8-sig')
@@ -48,7 +48,7 @@ if not new_entries.empty:
 else:
     print("ℹ️ No new entries to add.")
 
-# Handle duplicates ===
+# Handle duplicates
 if not duplicates.empty:
     print(f"\n⚠️ Found {len(duplicates)} duplicate DOI(s):")
 
