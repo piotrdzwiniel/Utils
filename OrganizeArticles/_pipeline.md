@@ -52,7 +52,7 @@ python 2_FetchMetadataFromCrossRefAPI.py
 ```
 
 * Reads `1_DOIs.csv`
-* Fetches metadata from CrossRef (title, authors, year, APA citation)
+* Fetches metadata from CrossRef (title, authors, year) and DOI (APA citation)
 * Saves metadata to `2_CrossRefMetadata.csv`
 
 ---
@@ -83,11 +83,11 @@ python 4_Splitter.py
 * Reads `3_FilenameAuthorYearTitleDOI.csv`
 * Moves:
 
-  * Articles **with DOI** → `articles_good/`
-  * Articles **without DOI** → `articles_bad/` - handle them manually
-* Clears `temp/` folder
+  * Articles **with valid DOI, title, authors, and year** → `articles_good/`
+  * Articles **with missing DOI**, or **with unknown title, authors, or year** → `articles_bad/` — ⚠️ handle them manually
+* Clears the `temp/` folder
 
-If there are remaining files in `temp/`, check them manually and most likely move to `articles_bad/`
+⚠️ If there are remaining files in `temp/`, inspect them manually — they likely belong in `articles_bad/`.
 
 ---
 
@@ -100,6 +100,6 @@ python 5_AddRecordsToDigitalLibrary.py
 ```
 
 * Reads `3_FilenameAuthorYearTitleDOI.csv`
-* Appends **new records** (based on DOI) to `DigitalLibrary.csv`
+* Appends **new records** (based on DOI and valid title, authors, and year) to `DigitalLibrary.csv`
 * Moves **duplicates** from `articles_good/` → `articles_duplicates/`
-* Skips already existing entries (based on DOI)
+* Skips already existing (based on DOI) or incomplete entries (unknown title, authors, or year)
